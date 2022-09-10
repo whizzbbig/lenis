@@ -102,16 +102,23 @@ export default class Lenis extends EventEmitter {
     } else {
       this.wrapperHeight = this.wrapperNode.offsetHeight
       this.wrapperWidth = this.wrapperNode.offsetWidth
-
-      //observe wrapper node size
       this.wrapperObserver = new ResizeObserver(this.onWrapperResize)
       this.wrapperObserver.observe(this.wrapperNode)
     }
 
-    this.contentHeight = this.contentNode.offsetHeight
-    this.contentWidth = this.contentNode.offsetWidth
+    // stop wheel event propagation
+    this.nestedNodes = Array.from(
+      this.contentNode.querySelectorAll('[data-lenis-stop-propagation]')
+    )
+    this.contentMutationObserver = new MutationObserver(this.onContentUpdate)
+    this.contentMutationObserver.observe(this.contentNode, {
+      childList: true,
+      subtree: true,
+    })
 
     //observe content node size
+    this.contentHeight = this.contentNode.offsetHeight
+    this.contentWidth = this.contentNode.offsetWidth
     this.contentObserver = new ResizeObserver(this.onContentResize)
     this.contentObserver.observe(this.contentNode)
 
@@ -146,14 +153,62 @@ export default class Lenis extends EventEmitter {
     }
     this.wrapperNode.removeEventListener('scroll', this.onScroll)
 
+    this.nestedNodes.forEach((node) => {
+      node.removeEventListener('wheel', this.stopPropagation)
+    })
+
     this.virtualScroll.destroy()
     this.wrapperObserver?.disconnect()
     this.contentObserver.disconnect()
+    this.contentMutationObserver.disconnect()
   }
 
   onWindowResize = () => {
     this.wrapperWidth = window.innerWidth
     this.wrapperHeight = window.innerHeight
+  }
+
+  stopPropagation = (e) => {
+    e.stopPropagation()
+  }
+
+  onContentUpdate = (entries) => {
+    if (!this.smooth) return
+
+    // remove non existing nodes
+    this.nestedNodes = this.nestedNodes.filter((node) => {
+      const exists = document.body.contains(node)
+
+      // remove wheel event listeners
+      if (!exists) {
+        node.removeEventListener('wheel', this.stopPropagation)
+      }
+
+      return exists
+    })
+
+    // browse added nodes
+    entries
+      .filter(({ addedNodes }) => addedNodes[0])
+      .forEach(({ addedNodes }) => {
+        Array.from(addedNodes).forEach((node) => {
+          this.nestedNodes = [
+            ...this.nestedNodes,
+            ...Array.from(
+              node.querySelectorAll('[data-lenis-stop-propagation]')
+            ),
+          ]
+
+          if (node.getAttribute('data-lenis-stop-propagation')) {
+            this.nestedNodes.push(node)
+          }
+        })
+      })
+
+    // add wheel event listeners
+    this.nestedNodes.forEach((node) => {
+      node.addEventListener('wheel', this.stopPropagation)
+    })
   }
 
   onWrapperResize = ([entry]) => {

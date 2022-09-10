@@ -207,8 +207,8 @@ export default function Home() {
                   href="https://github.com/locomotivemtl/locomotive-scroll"
                 >
                   Locomotive Scroll
-                </Link>{' '}
-                and{' '}
+                </Link>
+                and
                 <Link
                   className="contrast semi-bold"
                   href="https://greensock.com/docs/v3/Plugins/ScrollSmoother"
@@ -274,15 +274,19 @@ export default function Home() {
       </section>
       <section className={cn('theme-light', s.featuring)} ref={featuresRectRef}>
         <div className={s.inner}>
-          <div className={cn('layout-block', s.intro)}>
+          <div
+            className={cn('layout-block', s.intro)}
+            data-lenis-stop-propagation
+          >
             <p className="p-l">
-              Lenis is an{' '}
+              Lenis is an
               <Link
                 className="contrast semi-bold"
                 href="https://github.com/studio-freight/lenis"
               >
-                open-source library
-              </Link>{' '}
+                {' '}
+                open-source library{' '}
+              </Link>
               built to standardize scroll experiences and sauce up websites with
               butter-smooth navigation, all while using the platform and keeping
               it accessible.
