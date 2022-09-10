@@ -93,6 +93,7 @@
       margin: auto;
       transition: color 600ms var(--ease-out-expo);
       background-color: var(--theme-primary);
+      padding: mobile-vw(12px);
 
       @include desktop {
         padding: desktop-vw(12px);
