@@ -10,5 +10,6 @@
   },
   "prettier.enable": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "eslint.workingDirectories": ["./website"]
+  "eslint.workingDirectories": ["./website"],
+  "typescript.validate.enable": false
 }
